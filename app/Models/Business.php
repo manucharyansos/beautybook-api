@@ -5,10 +5,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Notifications\Notifiable;
 
 class Business extends Model
 {
-    use HasFactory;
+    use HasFactory; use Notifiable;
 
     protected $fillable = [
         'name',
@@ -97,6 +98,16 @@ class Business extends Model
     public function isClinic(): bool
     {
         return $this->business_type === 'clinic';
+    }
+
+    /**
+     * Backwards-compatible alias.
+     * Some parts of the app still use the older name "dental".
+     */
+    public function isDental(): bool
+    {
+        $t = (string) $this->business_type;
+        return $t === 'clinic' || $t === 'dental';
     }
 
     // Seat management

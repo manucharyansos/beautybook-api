@@ -10,6 +10,8 @@ use App\Models\Room;
 use App\Models\Service;
 use App\Models\Subscription;
 use App\Models\User;
+use App\Models\LoyaltyProgram;
+use App\Models\BookingItem;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Hash;
@@ -135,6 +137,14 @@ class DemoSeeder extends Seeder
         $this->createSubscriptions($proSalon, 'pro');
         $this->createSubscriptions($proClinic, 'pro');
         $this->createSubscriptions($businessClinic, 'business');
+
+        // =========================
+        // 8) Loyalty (Pro/Business default ON)
+        // =========================
+        $this->createLoyaltyProgram($proSalon, true);
+        $this->createLoyaltyProgram($proClinic, true);
+        $this->createLoyaltyProgram($businessClinic, true);
+        $this->createLoyaltyProgram($starterSalon, false);
 
         $this->command?->info('✅ Demo data seeded successfully!');
         $this->command?->info('📧 starter_salon.owner@mail.com / password');
@@ -319,7 +329,7 @@ class DemoSeeder extends Seeder
         // Past bookings (done)
         for ($d = 1; $d <= 30; $d++) {
             $day = Carbon::now()->subDays($d)->setTime(10, 0);
-            $this->createBookingsForDay($business, $day, $services, $staffIds, $clientIds, rand(2, 5), 'confirmed');
+            $this->createBookingsForDay($business, $day, $services, $staffIds, $clientIds, rand(2, 5), 'done');
         }
 
         // Future bookings (confirmed)
@@ -351,7 +361,7 @@ class DemoSeeder extends Seeder
                 $clientIds,
                 $roomIds,
                 rand(2, 4),
-                'confirmed'
+                'done'
             );
         }
 
@@ -387,7 +397,7 @@ class DemoSeeder extends Seeder
             $client = Client::find($clientId);
             if (!$client) continue;
 
-            Booking::create([
+            $booking = Booking::create([
                 'business_id' => $business->id,
                 'service_id' => $service->id,
                 'staff_id' => $staffIds[array_rand($staffIds)],
@@ -399,6 +409,15 @@ class DemoSeeder extends Seeder
                 'status' => $status,
                 'final_price' => $service->price,
                 'currency' => 'AMD',
+            ]);
+
+            BookingItem::create([
+                'booking_id' => $booking->id,
+                'service_id' => $service->id,
+                'position' => 0,
+                'duration_minutes' => (int)$service->duration_minutes,
+                'price' => $service->price,
+                'currency' => $service->currency ?? 'AMD',
             ]);
         }
     }
@@ -419,7 +438,7 @@ class DemoSeeder extends Seeder
             $client = Client::find($clientId);
             if (!$client) continue;
 
-            Booking::create([
+            $booking = Booking::create([
                 'business_id' => $business->id,
                 'service_id' => $service->id,
                 'staff_id' => $staffIds[array_rand($staffIds)],
@@ -434,6 +453,15 @@ class DemoSeeder extends Seeder
                 'room_id' => $roomIds[array_rand($roomIds)],
                 'clinical_notes' => 'Ամեն ինչ նորմալ է',
                 'is_emergency' => rand(0, 10) === 0,
+            ]);
+
+            BookingItem::create([
+                'booking_id' => $booking->id,
+                'service_id' => $service->id,
+                'position' => 0,
+                'duration_minutes' => (int)$service->duration_minutes,
+                'price' => $service->price,
+                'currency' => $service->currency ?? 'AMD',
             ]);
         }
     }
@@ -458,5 +486,19 @@ class DemoSeeder extends Seeder
             $sub->applyPlanSnapshot($plan);
             $sub->save();
         }
+    }
+
+    private function createLoyaltyProgram(Business $business, bool $enabled): void
+    {
+        LoyaltyProgram::updateOrCreate(
+            ['business_id' => $business->id],
+            [
+                'is_enabled' => $enabled,
+                'currency_unit' => 1000,
+                'points_per_currency_unit' => 1,
+                'min_booking_amount' => 0,
+                'notes' => '1 point / 1000 AMD',
+            ]
+        );
     }
 }

@@ -40,7 +40,25 @@ class PlansSeeder extends Seeder
                 'locations' => 1,
                 'features' => [
                     'staff_limit' => 2,
+                    // core
+                    'blocks' => true,
+                    // Phase 3A
+                    'multi_service' => false,
+                    // Phase 3B
+                    'gift_cards' => false,
+                    // Phase 3C
+                    'loyalty' => false,
+                    'export' => false,
+                    'rooms' => false,
+                    'online_booking' => false,
+
+                    // Clinic roadmap (Phase 3D/3E)
+                    'emr' => false,
+                    'treatment_plans' => false,
+
+                    // add-ons / upgrades
                     'sms_reminders' => 80,
+                    'reminders' => false,
                     'analytics' => false,
                     'clinic_patient_card' => false,
                     'api_access' => false,
@@ -53,7 +71,7 @@ class PlansSeeder extends Seeder
             ]
         );
 
-        // PRO — the most common for Armenia (5–7 staff)
+        // PRO — the most common for Armenia (up to ~5 staff for beauty)
         Plan::updateOrCreate(
             ['code' => 'pro'],
             [
@@ -66,13 +84,28 @@ class PlansSeeder extends Seeder
                 'price_beauty' => 12900,
                 'price_dental' => 15900,
                 'currency' => 'AMD',
-                'seats' => 6,
-                'staff_limit' => 6,
+                'seats' => 5,
+                'staff_limit' => 5,
                 'duration_days' => 30,
                 'locations' => 1,
                 'features' => [
-                    'staff_limit' => 6,
+                    'staff_limit' => 5,
+                    'blocks' => true,
+                    // Phase 3A
+                    'multi_service' => true,
+                    // Phase 3B
+                    'gift_cards' => true,
+                    // Phase 3C
+                    'loyalty' => true,
+                    'export' => true,
+                    'rooms' => false,
+                    'online_booking' => true,
+
+                    // Clinic roadmap (Phase 3D/3E)
+                    'emr' => false,
+                    'treatment_plans' => false,
                     'sms_reminders' => 300,
+                    'reminders' => false,
                     'analytics' => true,
                     'clinic_patient_card' => true,
                     'api_access' => false,
@@ -85,7 +118,7 @@ class PlansSeeder extends Seeder
             ]
         );
 
-        // BUSINESS — multi-staff + multi-location
+        // BUSINESS / CLINIC — bigger teams (clinic features + rooms)
         Plan::updateOrCreate(
             ['code' => 'business'],
             [
@@ -104,7 +137,22 @@ class PlansSeeder extends Seeder
                 'locations' => 3,
                 'features' => [
                     'staff_limit' => 15,
+                    'blocks' => true,
+                    // Phase 3A
+                    'multi_service' => true,
+                    // Phase 3B
+                    'gift_cards' => true,
+                    // Phase 3C
+                    'loyalty' => true,
+                    'export' => true,
+                    'rooms' => true,
+                    'online_booking' => true,
+
+                    // Clinic roadmap (Phase 3D/3E)
+                    'emr' => true,
+                    'treatment_plans' => true,
                     'sms_reminders' => 'unlimited',
+                    'reminders' => true,
                     'analytics' => true,
                     'clinic_patient_card' => true,
                     'api_access' => false,

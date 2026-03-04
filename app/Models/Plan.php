@@ -100,6 +100,9 @@ class Plan extends Model
             'sms_reminders' => $f['sms_reminders'] ?? 50,
             'analytics' => (bool)($f['analytics'] ?? false),
             'clinic_patient_card' => (bool)($f['clinic_patient_card'] ?? false),
+            // Phase 3 modules
+            'gift_cards' => (bool)($f['gift_cards'] ?? ($this->code !== 'starter')),
+            'loyalty' => (bool)($f['loyalty'] ?? ($this->code !== 'starter')),
             'api_access' => (bool)($f['api_access'] ?? false),
             'priority_support' => (bool)($f['priority_support'] ?? false),
             'dedicated_manager' => (bool)($f['dedicated_manager'] ?? false),

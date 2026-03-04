@@ -65,7 +65,8 @@ return [
     |
     */
 
-    'timezone' => 'GMT+4',
+    // Use a real IANA timezone to avoid Carbon/JS parsing issues.
+    'timezone' => env('APP_TIMEZONE', 'UTC'),
 
     /*
     |--------------------------------------------------------------------------

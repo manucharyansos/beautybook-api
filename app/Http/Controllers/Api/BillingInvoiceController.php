@@ -60,11 +60,13 @@ class BillingInvoiceController extends Controller
             );
 
             $sub->update([
-                'plan_id' => $plan->id,
-                'status' => 'active',
-                'trial_ends_at' => null,
-                'canceled_at' => null,
-            ]);
+    'plan_id' => $plan->id,
+    'status' => 'active',
+    'trial_ends_at' => null,
+    'canceled_at' => null,
+    'current_period_starts_at' => now(),
+    'current_period_ends_at' => now()->addMonth(),
+]);
 
             return response()->json([
                 'ok' => true,

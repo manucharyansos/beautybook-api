@@ -18,6 +18,13 @@ return Application::configure(basePath: dirname(__DIR__))
             'ensure.billable' => EnsureBusinessIsBillable::class,
             'ensure.seat' => App\Http\Middleware\EnsureSeatAvailable::class,
             'ensure.feature' => App\Http\Middleware\EnsureFeatureEnabled::class,
+            // Strict SaaS mode
+            'ensure.business' => App\Http\Middleware\EnsureBusinessContext::class,
+            'ensure.onboarded' => App\Http\Middleware\EnsureOnboardingCompleted::class,
+            'role' => App\Http\Middleware\EnsureRole::class,
+            'superadmin' => App\Http\Middleware\EnsureSuperAdmin::class,
+
+            // legacy / optional
             'admin' => AdminMiddleware::class,
         ]);
     })

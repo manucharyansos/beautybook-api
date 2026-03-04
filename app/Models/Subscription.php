@@ -65,6 +65,10 @@ class Subscription extends Model
 
     public function hasFeature(string $key): bool
     {
+        // Core features should not be gated by plan.
+        // (We keep feature flags for upsells like analytics/loyalty/etc.)
+        if ($key === 'blocks') return true;
+
         $f = $this->features();
         return (bool)($f[$key] ?? false);
     }

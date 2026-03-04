@@ -8,6 +8,7 @@ return new class extends Migration {
     public function up(): void {
         Schema::create('bookings', function (Blueprint $table) {
             $table->id();
+            $table->uuid('group_id')->nullable();
             $table->string('booking_code', 32)->nullable()->unique();
             $table->foreignId('business_id')->constrained()->cascadeOnDelete();
             $table->foreignId('service_id')->constrained()->cascadeOnDelete();

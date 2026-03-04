@@ -14,11 +14,70 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
+use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
+    /**
+     * POST /api/auth/forgot-password
+     * Sends reset link to email (uses Laravel notifications).
+     */
+    public function forgotPassword(Request $request)
+    {
+        $data = $request->validate([
+            'email' => ['required', 'email'],
+        ]);
+
+        $status = Password::sendResetLink(['email' => $data['email']]);
+
+        // For security, we always return 200 (do not leak if user exists)
+        return response()->json([
+            'message' => __($status),
+        ]);
+    }
+
+    /**
+     * POST /api/auth/reset-password
+     */
+    public function resetPassword(Request $request)
+    {
+        $data = $request->validate([
+            'token' => ['required', 'string'],
+            'email' => ['required', 'email'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ]);
+
+        $status = Password::reset(
+            [
+                'email' => $data['email'],
+                'password' => $data['password'],
+                'password_confirmation' => $data['password_confirmation'],
+                'token' => $data['token'],
+            ],
+            function ($user) use ($data) {
+                $user->forceFill([
+                    'password' => Hash::make($data['password']),
+                    'remember_token' => Str::random(60),
+                ])->save();
+
+                event(new PasswordReset($user));
+            }
+        );
+
+        if ($status !== Password::PASSWORD_RESET) {
+            return response()->json([
+                'message' => __($status),
+            ], 422);
+        }
+
+        return response()->json([
+            'message' => __($status),
+        ]);
+    }
+
     public function login(Request $request)
     {
         $data = $request->validate([
@@ -153,13 +212,20 @@ class AuthController extends Controller
                 ->where('code', 'starter')
                 ->first();
 
-            $sub = Subscription::create([
+            $sub = new Subscription([
                 'business_id' => $business->id,
-                'plan_id' => $plan?->id ?? 1,
-                'status' => 'trialing',
+                'status' => Subscription::STATUS_TRIALING,
                 'trial_ends_at' => now()->addDays($trialDays),
-                // snapshots will be filled by Subscription model boot / service layer in Phase 1
             ]);
+
+            // ✅ snapshot features/seats from the selected plan
+            if ($plan) {
+                $sub->applyPlanSnapshot($plan);
+            } else {
+                $sub->plan_id = 1;
+            }
+
+            $sub->save();
 
             TrialAttempt::query()->create([
                 'phone_norm' => $phoneNorm,
@@ -211,6 +277,8 @@ class AuthController extends Controller
                 'business_slug' => $user->business?->slug,
                 'business_type' => $user->business?->business_type,
                 'needs_onboarding' => !$user->business || !$user->business->is_onboarding_completed,
+                'billing_status' => $user->business?->billing_status ?? 'active',
+                'is_billable' => ($user->business?->billing_status ?? 'active') === 'active',
             ],
         ]);
     }

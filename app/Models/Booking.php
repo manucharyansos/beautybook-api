@@ -54,6 +54,15 @@ class Booking extends Model
         return $this->belongsTo(Service::class);
     }
 
+    /**
+     * Multi-service booking items (Phase 3A).
+     * If empty, booking falls back to single service_id.
+     */
+    public function items()
+    {
+        return $this->hasMany(BookingItem::class)->orderBy('position');
+    }
+
     public function staff()
     {
         return $this->belongsTo(User::class, 'staff_id');

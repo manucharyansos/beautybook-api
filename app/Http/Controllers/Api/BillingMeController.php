@@ -19,6 +19,13 @@ class BillingMeController extends Controller
 
         $sub = $business->subscription;
 
+        $features = [];
+        if ($sub && method_exists($sub, 'features')) {
+            $features = $sub->features();
+        } elseif ($sub?->plan) {
+            $features = (array) ($sub->plan->features ?? []);
+        }
+
         $isActive = $sub && $sub->isActive();
         $isSuspended = $business->billing_status === 'suspended';
 
@@ -60,6 +67,7 @@ class BillingMeController extends Controller
                         'price' => $sub->plan->price,
                         'currency' => $sub->plan->currency,
                         'seats' => $sub->plan->seats,
+                    'features' => $features,
                     ] : null,
                 ] : null,
             ]

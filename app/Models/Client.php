@@ -41,6 +41,17 @@ class Client extends Model
         return $this->hasMany(Booking::class);
     }
 
+    public function loyaltyLedger()
+    {
+        return $this->hasMany(LoyaltyPointLedger::class);
+    }
+
+    public function getLoyaltyPointsBalanceAttribute(): int
+    {
+        // Cheap + safe for now. Later we can cache/materialize.
+        return (int) $this->loyaltyLedger()->sum('delta_points');
+    }
+
     // Scopes
     public function scopeForDental($query)
     {

@@ -25,7 +25,7 @@ class CalendarController extends Controller
         ]);
 
         $q = Booking::query()
-            ->with(['service', 'staff'])
+            ->with(['service', 'staff', 'items.service'])
             ->whereBetween('starts_at', [$data['from'], $data['to']]);
 
         if ($actor->isSuperAdmin()) {
